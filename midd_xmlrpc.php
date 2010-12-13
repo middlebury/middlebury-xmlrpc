@@ -124,6 +124,8 @@ function midd_xmlrpc_searchBlogs ($query) {
  * @return string
  */
 function midd_xmlrpc_createBlog ($args) {
+	global $wpdb;
+
 	if (!is_array($args) || count($args) != 3)
 		return(new IXR_Error(400, __("This method requires 3 parameters, a name, a title, and a visibility setting.")));
 	$name = $args[0];
@@ -140,7 +142,7 @@ function midd_xmlrpc_createBlog ($args) {
 	// own login function
 	$user = midd_xmlrpc_authenticate();
 
-	// Create the blog (based on validate_blog_signup() in wp-signup.php)
+	// Create the blog (based on validate_blog_signup() in wp-signup.php and wpmu_activate_signup() in includes/ms-functions.php)
 	$result = wpmu_validate_blog_signup($name, $title, $user);
 	extract($result);
 	if ($errors->get_error_code()) {
@@ -152,20 +154,18 @@ function midd_xmlrpc_createBlog ($args) {
 	$meta = array ('lang_id' => 1, 'public' => $public);
 	$meta = apply_filters( "add_signup_meta", $meta );
 
-	wpmu_signup_blog($domain, $path, $blog_title, $user->user_login, $user->user_email, $meta);
+	$blog_id = wpmu_create_blog( $domain, $path, $title, $user->user_id, $meta, $wpdb->siteid );
+
+	// TODO: What to do if we create a user but cannot create a blog?
+	if ( is_wp_error($blog_id) ) {
+		return(new IXR_Error(400, $blog_id->get_error_message()));
+	}
+
+	do_action('wpmu_activate_blog', $blog_id, $user->user_id, NULL, $title, $meta);
 
 	ob_start();
-	print "<p style='font-weight: bold; font-size: larger;'>";
-	printf( __( 'Congratulations! Your new site, %s, is almost ready.' ), "<a href='http://{$domain}{$path}'>{$blog_title}</a>" );
-	print "</p>";
 	print "<p>";
-	_e( 'But, before you can start using your site, <strong>you must activate it</strong>.' );
-	print "</p>";
-	print "<p>";
-	printf( __( 'Check your inbox at <strong>%s</strong> and click the link given.' ),  $user->user_email);
-	print "</p>";
-	print "<p>";
-	_e( 'If you do not activate your site within two days, you will have to sign up again.' );
+	printf( __( 'Congratulations! Your new site, %s, is ready.' ), "<a href='http://{$domain}{$path}'>{$blog_title}</a>" );
 	print "</p>";
 
 	return ob_get_clean();
