@@ -154,14 +154,14 @@ function midd_xmlrpc_createBlog ($args) {
 	$meta = array ('lang_id' => 1, 'public' => $public);
 	$meta = apply_filters( "add_signup_meta", $meta );
 
-	$blog_id = wpmu_create_blog( $domain, $path, $title, $user->user_id, $meta, $wpdb->siteid );
+	$blog_id = wpmu_create_blog( $domain, $path, $title, $user->ID, $meta, $wpdb->siteid );
 
 	// TODO: What to do if we create a user but cannot create a blog?
 	if ( is_wp_error($blog_id) ) {
 		return(new IXR_Error(400, $blog_id->get_error_message()));
 	}
 
-	do_action('wpmu_activate_blog', $blog_id, $user->user_id, NULL, $title, $meta);
+	do_action('wpmu_activate_blog', $blog_id, $user->ID, NULL, $title, $meta);
 
 	ob_start();
 	print "<p>";
