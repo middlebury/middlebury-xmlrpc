@@ -186,6 +186,29 @@ function midd_xmlrpc_createBlog ($args) {
 	return ob_get_clean();
 }
 
+/**
+ * Add all users in a group to a blog.
+ *
+ * @param array $args
+ * @return boolean
+ */
+function midd_xmlrpc_addGroup ($args) {
+	if (!is_array($args) || count($args) != 2)
+		return(new IXR_Error(400, __("This method requires 2 parameters, a blog name and a group DN.")));
+	$name = $args[0];
+	$group = $args[1];
+
+	// WPCAS always redirects to /wp-admin/ after login, so we need to call our
+	// own login function
+	$user = midd_xmlrpc_authenticate();
+
+	$blog_id = get_id_from_blogname($name);
+	switch_to_blog($blog_id);
+	if (!current_user_can('edit_users'))
+		return false;
+
+}
+
 
 /**
  * Authenticate the user.
