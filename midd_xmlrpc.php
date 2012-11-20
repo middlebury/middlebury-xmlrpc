@@ -16,6 +16,7 @@ function midd_xmlrpc_methods( $methods ) {
 	'midd.searchBlogs' => 'midd_xmlrpc_searchBlogs',
 	'midd.getBlog' => 'midd_xmlrpc_getBlog',
 	'midd.createBlog' => 'midd_xmlrpc_createBlog',
+	'midd.addUser' => 'midd_xmlrpc_addUser',
     ));
 }
 
@@ -248,4 +249,51 @@ function midd_xmlrpc_get_blogname_from_id ($id) {
 
 	wp_cache_set( 'midd_xmlrpc_get_blogname_from_id_' . $id, $name, 'blog-details' );
 	return $name;
+}
+
+/**
+ * Add a user to a blog.
+ *
+ * @param string args
+ */
+function midd_xmlrpc_addUser ( $args )	{
+	global $wpdb;
+
+	if (!is_array($args) || count($args) != 3)
+		return(new IXR_Error(400, __("This method requires 3 parameters, a CAS ID, a blog ID, and a WordPress authentication level.")));
+	$cas_id = $args[0];
+	$blog_id = $args[1];
+	$role = $args[2];
+
+	if (!strlen($cas_id))
+		return(new IXR_Error(400, __("This method requires a CAS ID string.")));
+	if (!is_int($blog_id))
+		return(new IXR_Error(400, __("This method requires a blog ID integer.")));
+	if (!strlen($role))
+		return(new IXR_Error(400, __("This method requires a WordPress authentication level string.")));
+
+	try {
+		$xpath = dynaddusers_midd_lookup(array(
+			'action' => 'get_user',
+			'id' => $cas_id,
+		));
+	} catch(Exception $e) {
+		// Exception thrown when we cannot load the XML information for a user.
+		throw $e;
+	}
+
+	$entries = $xpath->query('/cas:results/cas:entry');
+	if ($entries->length !== 1)
+		throw new Exception('Could not get user. Expecting 1 entry, found '.$entries->length);
+
+	$user = dynaddusers_get_user($user_info);
+
+	switch_to_blog($blog_id);
+	try {
+	  dynaddusers_add_user_to_blog($user, $role);
+	} catch (Exception $e) {
+		// Exception thrown if the blog does not exist or if the user is already a member.
+		throw $e;
+	}
+	restore_current_blog( );
 }
