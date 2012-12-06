@@ -144,6 +144,20 @@ function midd_xmlrpc_createBlog ($args) {
 	$user = midd_xmlrpc_authenticate();
 
 	// Create the blog (based on validate_blog_signup() in wp-signup.php and wpmu_activate_signup() in includes/ms-functions.php)
+
+	// Check if site creation is currently enabled for the current user.
+	$active_signup = get_site_option( 'registration' );
+	if ( !$active_signup )
+		$active_signup = 'all';
+	$active_signup = apply_filters( 'wpmu_active_signup', $active_signup ); // return "all", "none", "blog" or "user"
+	if ( $active_signup == 'none' ) {
+		return(new IXR_Error(403, 'Registration has been disabled.' ));
+	} elseif ( $active_signup == 'blog' && !$user->ID ) {
+		return(new IXR_Error(403, 'You must be authenticated to create a site.' ));
+	} elseif ($active_signup != 'all' && $active_signup != 'blog' ) {
+		return(new IXR_Error(403, 'Registration has been disabled.' ));
+	}
+
 	$result = wpmu_validate_blog_signup($name, $title, $user);
 	extract($result);
 	if ($errors->get_error_code()) {
