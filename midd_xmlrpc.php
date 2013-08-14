@@ -297,7 +297,7 @@ function midd_xmlrpc_addUser ( $args )	{
 	global $wpdb;
 
 	if (!is_array($args) || count($args) != 3)
-		return(new IXR_Error(400, __("This method requires 3 parameters, a CAS ID, a blog ID, and a WordPress authentication level.")));
+		return(new IXR_Error(400, __("This method requires 3 parameters, a CAS ID, a blog ID, and a WordPress role.")));
 	$cas_id = $args[0];
 	$blog_id = $args[1];
 	$role = $args[2];
@@ -307,7 +307,7 @@ function midd_xmlrpc_addUser ( $args )	{
 	if (!is_int($blog_id))
 		return(new IXR_Error(400, __("This method requires a blog ID integer.")));
 	if (!strlen($role))
-		return(new IXR_Error(400, __("This method requires a WordPress authentication level string.")));
+		return(new IXR_Error(400, __("This method requires a WordPress role string.")));
 
 	try {
 		$xpath = dynaddusers_midd_lookup(array(
