@@ -17,6 +17,9 @@ function midd_xmlrpc_methods( $methods ) {
 	'midd.getBlog' => 'midd_xmlrpc_getBlog',
 	'midd.createBlog' => 'midd_xmlrpc_createBlog',
 	'midd.addUser' => 'midd_xmlrpc_addUser',
+	'midd.addSyncedGroup' => 'midd_xmlrpc_addSyncedGroup',
+	'midd.getSyncedGroups' => 'midd_xmlrpc_getSyncedGroups',
+	'midd.removeSyncedGroup' => 'midd_xmlrpc_removeSyncedGroup',
     ));
 }
 
@@ -187,30 +190,6 @@ function midd_xmlrpc_createBlog ($args) {
 }
 
 /**
- * Add all users in a group to a blog.
- *
- * @param array $args
- * @return boolean
- */
-function midd_xmlrpc_addGroup ($args) {
-	if (!is_array($args) || count($args) != 2)
-		return(new IXR_Error(400, __("This method requires 2 parameters, a blog name and a group DN.")));
-	$name = $args[0];
-	$group = $args[1];
-
-	// WPCAS always redirects to /wp-admin/ after login, so we need to call our
-	// own login function
-	$user = midd_xmlrpc_authenticate();
-
-	$blog_id = get_id_from_blogname($name);
-	switch_to_blog($blog_id);
-	if (!current_user_can('edit_users'))
-		return false;
-
-}
-
-
-/**
  * Authenticate the user.
  *
  * WPCAS always redirects to /wp-admin/ after login, so we need our own login function.
@@ -256,6 +235,7 @@ function midd_xmlrpc_blogInfo ($blog_id) {
 		'public'		=> intval(get_option('blog_public')),
 		'url'			=> get_option( 'home' ) . '/',
 		'xmlrpc'		=> site_url( 'xmlrpc.php' ),
+		'synced_groups'	=> dynaddusers_get_synced_groups(),
 	);
 	restore_current_blog( );
 	return $info;
@@ -333,4 +313,119 @@ function midd_xmlrpc_addUser ( $args )	{
 		throw $e;
 	}
 	restore_current_blog( );
+}
+
+/**
+ * Add a group of users to a blog.
+ *
+ * @param string args
+ */
+function midd_xmlrpc_addSyncedGroup ( $args )	{
+	global $wpdb;
+
+	if (!is_array($args) || count($args) != 3)
+		return(new IXR_Error(400, __("This method requires 3 parameters, a group dn, a blog ID or name, and a WordPress role.")));
+	$blog_id_or_name = $args[0];
+	$group_dn = $args[1];
+	$role = $args[2];
+
+	if (empty($blog_id_or_name))
+		return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
+	if (!strlen($group_dn))
+		return(new IXR_Error(400, __("This method requires a group dn string.")));
+	if (!strlen($role))
+		return(new IXR_Error(400, __("This method requires a WordPress role string.")));
+
+	// WPCAS always redirects to /wp-admin/ after login, so we need to call our
+	// own login function
+	$user = midd_xmlrpc_authenticate();
+
+	if (is_numeric($blog_id_or_name))
+		$blog_id = intval($blog_id_or_name);
+	else
+		$blog_id = get_id_from_blogname($blog_id_or_name);
+	switch_to_blog($blog_id);
+	if (!current_user_can('edit_users'))
+		return false;
+
+	$memberInfo = dynaddusers_get_member_info($group_dn);
+	if (!is_array($memberInfo))
+		throw new Exception("Could not find group members for ".$group_dn);
+
+	dynaddusers_keep_in_sync($group_dn, $role);
+	dynaddusers_sync_group($blog_id, $group_dn, $role);
+	restore_current_blog();
+	return true;
+}
+
+/**
+ * Answer the groups that are being kept in sync
+ *
+ * @param string args
+ */
+function midd_xmlrpc_getSyncedGroups ( $args )	{
+	global $wpdb;
+
+	if (is_string($args)) {
+		$blog_id_or_name = $args;
+	} else if (is_array($args)) {
+		if(count($args) != 1)
+			return(new IXR_Error(400, __("This method requires 1 parameter, a blog ID or name.")));
+		else
+			$blog_id_or_name = $args[0];
+	}
+
+	if (empty($blog_id_or_name))
+		return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
+
+	// WPCAS always redirects to /wp-admin/ after login, so we need to call our
+	// own login function
+	$user = midd_xmlrpc_authenticate();
+
+	if (is_numeric($blog_id_or_name))
+		$blog_id = intval($blog_id_or_name);
+	else
+		$blog_id = get_id_from_blogname($blog_id_or_name);
+	switch_to_blog($blog_id);
+	if (!current_user_can('edit_users'))
+		return false;
+
+	return dynaddusers_get_synced_groups();
+}
+
+/**
+ * Add a group of users to a blog.
+ *
+ * @param string args
+ */
+function midd_xmlrpc_removeSyncedGroup ( $args )	{
+	global $wpdb;
+
+	if (!is_array($args) || count($args) != 2)
+		return(new IXR_Error(400, __("This method requires 3 parameters, a group dn, a blog ID or name, and a WordPress role.")));
+	$blog_id_or_name = $args[0];
+	$group_dn = $args[1];
+
+	if (empty($blog_id_or_name))
+		return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
+	if (!strlen($group_dn))
+		return(new IXR_Error(400, __("This method requires a group dn string.")));
+
+	// WPCAS always redirects to /wp-admin/ after login, so we need to call our
+	// own login function
+	$user = midd_xmlrpc_authenticate();
+
+	if (is_numeric($blog_id_or_name))
+		$blog_id = intval($blog_id_or_name);
+	else
+		$blog_id = get_id_from_blogname($blog_id_or_name);
+	switch_to_blog($blog_id);
+	if (!current_user_can('edit_users'))
+		return false;
+
+	ob_start();
+	dynaddusers_remove_users_in_group($group_dn);
+	dynaddusers_stop_syncing($group_dn);
+	ob_end_clean();
+	return true;
 }
