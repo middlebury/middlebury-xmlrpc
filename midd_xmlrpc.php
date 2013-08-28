@@ -348,9 +348,14 @@ function midd_xmlrpc_addSyncedGroup ( $args )	{
 	if (!current_user_can('edit_users'))
 		return false;
 
-	$memberInfo = dynaddusers_get_member_info($group_dn);
-	if (!is_array($memberInfo))
-		throw new Exception("Could not find group members for ".$group_dn);
+	try {
+		$memberInfo = dynaddusers_get_member_info($group_dn);
+		if (!is_array($memberInfo))
+			throw new Exception("Could not find group members for ".$group_dn);
+	} catch (Exception $ex) {
+		restore_current_blog();
+		return false;
+	}
 
 	dynaddusers_keep_in_sync($group_dn, $role);
 	dynaddusers_sync_group($blog_id, $group_dn, $role);
