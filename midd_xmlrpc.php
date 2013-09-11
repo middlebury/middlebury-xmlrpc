@@ -345,16 +345,15 @@ function midd_xmlrpc_addSyncedGroup ( $args )	{
 	else
 		$blog_id = get_id_from_blogname($blog_id_or_name);
 	switch_to_blog($blog_id);
-	if (!current_user_can('edit_users'))
-		return false;
+	if (!current_user_can('administrator'))
+		return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
 
 	try {
 		$memberInfo = dynaddusers_get_member_info($group_dn);
 		if (!is_array($memberInfo))
-			throw new Exception("Could not find group members for ".$group_dn);
-	} catch (Exception $ex) {
-		restore_current_blog();
-		return false;
+			return(new IXR_Error(400, __("Could not find group members for ".$group_dn)));
+	} catch (Exception $e) {
+		return(new IXR_Error(400, __("Could not find group members for ".$group_dn)));
 	}
 
 	dynaddusers_keep_in_sync($group_dn, $role);
@@ -392,8 +391,9 @@ function midd_xmlrpc_getSyncedGroups ( $args )	{
 	else
 		$blog_id = get_id_from_blogname($blog_id_or_name);
 	switch_to_blog($blog_id);
-	if (!current_user_can('edit_users'))
-		return false;
+	$user = wp_get_current_user();
+	if (!current_user_can('administrator'))
+		return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
 
 	return dynaddusers_get_synced_groups();
 }
@@ -425,8 +425,8 @@ function midd_xmlrpc_removeSyncedGroup ( $args )	{
 	else
 		$blog_id = get_id_from_blogname($blog_id_or_name);
 	switch_to_blog($blog_id);
-	if (!current_user_can('edit_users'))
-		return false;
+	if (!current_user_can('administrator'))
+		return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
 
 	ob_start();
 	dynaddusers_remove_users_in_group($group_dn);
