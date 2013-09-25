@@ -225,6 +225,7 @@ function midd_xmlrpc_authenticate () {
  */
 function midd_xmlrpc_blogInfo ($blog_id) {
 	switch_to_blog($blog_id);
+	$blog = get_blog_details();
 	$info = array(
 		'blogid'		=> $blog_id,
 		'name'			=> midd_xmlrpc_get_blogname_from_id($blog_id),
@@ -233,6 +234,8 @@ function midd_xmlrpc_blogInfo ($blog_id) {
 		'isSubscriber'	=> current_user_can('read'),
 		'canRead'		=> (current_user_can('read') || intval(get_option('blog_public')) >= -1),
 		'public'		=> intval(get_option('blog_public')),
+		'deleted'		=> intval($blog->deleted),
+		'archived'		=> intval($blog->archived),
 		'url'			=> get_option( 'home' ) . '/',
 		'xmlrpc'		=> site_url( 'xmlrpc.php' ),
 		'synced_groups'	=> dynaddusers_get_synced_groups(),
