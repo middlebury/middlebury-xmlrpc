@@ -26,10 +26,14 @@ class midd_xmlrpc_server extends wp_xmlrpc_server {
 
 	function multiCall($methodcalls)
 	{
-		foreach ($methodcalls as $call) {
-			trigger_error('XMLRPC multi-sub-call ' . $call['methodName'] . '(' . json_encode($call['params']) . ')', E_USER_NOTICE);
+		$results = parent::multiCall($methodcalls);
+		// multicall doesn't call error(), so log our faults here.
+		foreach ($results as $result) {
+			if (!empty($result['faultCode'])) {
+				trigger_error('XMLRPC fault ['.$result['faultCode'].'] '. $result['faultString'], E_USER_WARNING);
+			}
 		}
-		return parent::multiCall($methodcalls);
+		return $results;
 	}
 
 	function error($error, $message = false)
