@@ -1,12 +1,41 @@
 <?php
 /*
-Plugin Name:    Midd XML-RPC Methods
+Plugin Name:    Midd XML-RPC Methods and server.
 Plugin URI:
 Description:    XML-RPC methods for searching for, creating, and checking permissions on blogs. Makes use of CAS authentication.
 Version:        0.1
 Author:         Adam Franco
 Author URI:     http://www.adamfranco.com/
  */
+
+add_filter( 'wp_xmlrpc_server_class', 'midd_xmlrpc_server_class');
+function midd_xmlrpc_server_class () {
+	return "midd_xmlrpc_server";
+}
+include_once(dirname(dirname(dirname(__FILE__))) . '/' . WPINC . '/IXR/class-IXR-server.php');
+include_once(dirname(dirname(dirname(__FILE__))) . '/' . WPINC . '/class-wp-xmlrpc-server.php');
+class midd_xmlrpc_server extends wp_xmlrpc_server {
+
+	function call($methodname, $args)
+	{
+		// Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
+		trigger_error('XMLRPC call ' . $methodname . '(' . implode(', ', $args) . ')', E_USER_NOTICE);
+		return parent::call($methodname, $args);
+	}
+
+	function error($error, $message = false)
+	{
+		// Accepts either an error object or an error code and message
+		if ($message && !is_object($error)) {
+				$error = new IXR_Error($error, $message);
+		}
+		// Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
+		trigger_error('XMLRPC fault ['.$error->code.'] '. $error->message, E_USER_WARNING);
+
+		$this->output($error->getXml());
+	}
+}
+
 
 add_filter( 'xmlrpc_methods', 'midd_xmlrpc_methods' );
 function midd_xmlrpc_methods( $methods ) {
