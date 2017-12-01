@@ -19,8 +19,17 @@ class midd_xmlrpc_server extends wp_xmlrpc_server {
 	function call($methodname, $args)
 	{
 		// Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
-		trigger_error('XMLRPC call ' . $methodname . '(' . implode(', ', $args) . ')', E_USER_NOTICE);
+		trigger_error('XMLRPC call ' . $methodname . '(' . json_encode($args) . ')', E_USER_NOTICE);
+
 		return parent::call($methodname, $args);
+	}
+
+	function multiCall($methodcalls)
+	{
+		foreach ($methodcalls as $call) {
+			trigger_error('XMLRPC multi-sub-call ' . $call['methodName'] . '(' . json_encode($call['params']) . ')', E_USER_NOTICE);
+		}
+		return parent::multiCall($methodcalls);
 	}
 
 	function error($error, $message = false)
