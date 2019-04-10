@@ -252,7 +252,7 @@ function midd_xmlrpc_authenticate () {
 
 	// register the user as authenticated.
 	wp_set_auth_cookie( $user->ID );
-	do_action('wp_login', $user->user_login);
+	do_action('wp_login', $user->user_login, $user);
 	wp_set_current_user($user->ID, $user->user_login);
 
 	return $user;
