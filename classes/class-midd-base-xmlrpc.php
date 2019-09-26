@@ -2,7 +2,18 @@
 
 abstract class Midd_Base_XMLRPC {
 
-  private static $instance;
+  /**
+   * Answer an instance of the handler
+   *
+   * @return Midd_Base_XMLRPC
+   *   The instance.
+   */
+  public static function instance() {
+    if (empty(static::$instance)) {
+      static::$instance = new static();
+    }
+    return static::$instance;
+  }
 
   /**
    * Answer the prefix for methods when registering filter('xmlrpc_methods').
@@ -11,13 +22,6 @@ abstract class Midd_Base_XMLRPC {
    *   The prefix.
    */
   abstract protected function xmlrpcPrefix();
-
-  public static function instance() {
-    if (empty(self::$instance)) {
-      self::$instance = new static();
-    }
-    return self::$instance;
-  }
 
   /**
    * Add methods to those available via XMLRPC.
@@ -31,7 +35,7 @@ abstract class Midd_Base_XMLRPC {
    *   The methods.
    */
   public static function methods(array $methods) {
-    $instance = self::instance();
+    $instance = static::instance();
     $prefix = $instance->xmlrpcPrefix();
     return array_merge($methods, [
         $prefix . '.blogExists' => [$instance, 'blogExists'],

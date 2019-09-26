@@ -5,6 +5,8 @@ include_once(dirname(__FILE__) . '/class-midd-xmlrpc-exception.php');
 
 class Midd_XMLRPC extends Midd_Base_XMLRPC {
 
+  protected static $instance;
+
   /**
    * Authenticate and set the current user id.
    *

@@ -21,6 +21,8 @@ include_once(dirname(__FILE__) . '/class-midd-xmlrpc-exception.php');
 
 class Midd2_XMLRPC extends Midd_Base_XMLRPC {
 
+  protected static $instance;
+
   protected $auth_failed = false;
 
   /**
