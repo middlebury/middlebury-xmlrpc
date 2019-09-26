@@ -24,6 +24,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   protected static $instance;
 
   protected $auth_failed = false;
+  protected $service_user;
 
   /**
    * Authenticate and set the current user id.
@@ -56,6 +57,9 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
       // Flag that authentication has failed once on this wp_xmlrpc_server instance
       $this->auth_failed = true;
     }
+
+    // Store our service_user for later reference.
+    $this->service_user = $service_user;
 
     // If the service_username is the same as the act_as_username, take actions
     // using the service_user account.
@@ -220,7 +224,15 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
     $title = $args[4];
     $public = $args[5];
     $user = $this->authenticate($args);
-    return $this->doCreateBlog($user, $name, $title, $public);
+    // Registration may be restricted to CAS-Authenticated group membership
+    // by the midd-limit-blog-registration plugin. Override the registration
+    // check if our service_user is a network-admin.
+    if (!empty($this->service_user) && user_can($this->service_user, 'manage_sites')) {
+      $overrideRegistrationCheck = true;
+    } else {
+      $overrideRegistrationCheck = false;
+    }
+    return $this->doCreateBlog($user, $name, $title, $public, $overrideRegistrationCheck);
   }
 
   /**

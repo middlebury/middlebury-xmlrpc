@@ -142,7 +142,7 @@ abstract class Midd_Base_XMLRPC {
    * @param string $args '
    * @return string
    */
-  protected function doCreateBlog ($user, $name, $title, $public) {
+  protected function doCreateBlog ($user, $name, $title, $public, $overrideRegistrationCheck = false) {
     global $wpdb;
 
     if (!strlen($name))
@@ -154,17 +154,23 @@ abstract class Midd_Base_XMLRPC {
 
     // Create the blog (based on validate_blog_signup() in wp-signup.php and wpmu_activate_signup() in includes/ms-functions.php)
 
-    // Check if site creation is currently enabled for the current user.
-    $active_signup = get_site_option( 'registration' );
-    if ( !$active_signup )
-      $active_signup = 'all';
-    $active_signup = apply_filters( 'wpmu_active_signup', $active_signup ); // return "all", "none", "blog" or "user"
-    if ( $active_signup == 'none' ) {
-      return(new IXR_Error(403, 'Registration has been disabled.' ));
-    } elseif ( $active_signup == 'blog' && !$user->ID ) {
-      return(new IXR_Error(403, 'You must be authenticated to create a site.' ));
-    } elseif ($active_signup != 'all' && $active_signup != 'blog' ) {
-      return(new IXR_Error(403, 'Registration has been disabled.' ));
+    if ($overrideRegistrationCheck) {
+      // Trust that our caller method has verified that the user can create sites.
+      // This is useful for a course-only WordPress instance that doens't allow
+      // direct self-registration, but does allow creation via API.
+    } else {
+      // Check if site creation is currently enabled for the current user.
+      $active_signup = get_site_option( 'registration' );
+      if ( !$active_signup )
+        $active_signup = 'all';
+      $active_signup = apply_filters( 'wpmu_active_signup', $active_signup ); // return "all", "none", "blog" or "user"
+      if ( $active_signup == 'none' ) {
+        return(new IXR_Error(403, 'Registration has been disabled.' ));
+      } elseif ( $active_signup == 'blog' && !$user->ID ) {
+        return(new IXR_Error(403, 'You must be authenticated to create a site.' ));
+      } elseif ($active_signup != 'all' && $active_signup != 'blog' ) {
+        return(new IXR_Error(403, 'Registration has been disabled.' ));
+      }
     }
 
     $result = wpmu_validate_blog_signup($name, $title, $user);
