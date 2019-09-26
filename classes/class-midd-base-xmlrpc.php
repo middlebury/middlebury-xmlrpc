@@ -99,7 +99,12 @@ abstract class Midd_Base_XMLRPC {
     $id = get_id_from_blogname($name);
     if(is_null($id))
       return false;
-    return $this->blogInfo($id);
+    $info = $this->blogInfo($id);
+    if ($info['canRead']) {
+      return $info;
+    } else {
+      return new IXR_Error(403, __("You are not authorized to view this blog."));
+    }
   }
 
 
@@ -211,6 +216,12 @@ abstract class Midd_Base_XMLRPC {
     }
 
     switch_to_blog($blog_id);
+
+    // Check permissions for the current user.
+    if (!current_user_can('promote_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to promote_users for this site.")));
+    }
+
     try {
       dynaddusers_add_user_to_blog($user, $role);
     } catch (Exception $e) {
@@ -242,6 +253,12 @@ abstract class Midd_Base_XMLRPC {
     }
 
     switch_to_blog($blog_id);
+
+    // Check permissions for the current user.
+    if (!current_user_can('remove_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to promote_users for this site.")));
+    }
+
     // remove the user from the blog if they are a member
     if (is_user_member_of_blog($user->ID, $blog_id)) {
       remove_user_from_blog($user->ID, $blog_id);
@@ -272,8 +289,11 @@ abstract class Midd_Base_XMLRPC {
     else
       $blog_id = get_id_from_blogname($blog_id_or_name);
     switch_to_blog($blog_id);
-    if (!current_user_can('administrator'))
-      return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
+
+    // Check permissions for the current user.
+    if (!current_user_can('promote_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to promote_users for this site.")));
+    }
 
     try {
       $memberInfo = dynaddusers_get_member_info($group_dn);
@@ -305,9 +325,11 @@ abstract class Midd_Base_XMLRPC {
     else
       $blog_id = get_id_from_blogname($blog_id_or_name);
     switch_to_blog($blog_id);
-    $user = wp_get_current_user();
-    if (!current_user_can('administrator'))
-      return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
+
+    // Check permissions for the current user.
+    if (!current_user_can('list_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to list_users for this site.")));
+    }
 
     return dynaddusers_get_synced_groups();
   }
@@ -331,8 +353,11 @@ abstract class Midd_Base_XMLRPC {
     else
       $blog_id = get_id_from_blogname($blog_id_or_name);
     switch_to_blog($blog_id);
-    if (!current_user_can('administrator'))
-      return(new IXR_Error(403, __("You are not an authorized administrator for this site.")));
+
+    // Check permissions for the current user.
+    if (!current_user_can('remove_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to promote_users for this site.")));
+    }
 
     ob_start();
     dynaddusers_remove_users_in_group($group_dn);
@@ -363,8 +388,10 @@ abstract class Midd_Base_XMLRPC {
       'archived'		=> intval($blog->archived),
       'url'			=> get_option( 'home' ) . '/',
       'xmlrpc'		=> site_url( 'xmlrpc.php' ),
-      'synced_groups'	=> dynaddusers_get_synced_groups(),
     );
+    if (current_user_can('list_users')) {
+      $info['synced_groups'] = dynaddusers_get_synced_groups();
+    }
     restore_current_blog( );
     return $info;
   }
