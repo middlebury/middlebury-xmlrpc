@@ -169,8 +169,6 @@ abstract class Midd_Base_XMLRPC {
       return(new IXR_Error(400, $errors->get_error_message()));
     }
 
-    // 	return(new IXR_Error(400, "<pre>".print_r($result, true)."</pre>"));
-
     $meta = array ('lang_id' => 1, 'public' => $public);
     $meta = apply_filters( "add_signup_meta", $meta );
 
@@ -198,7 +196,7 @@ abstract class Midd_Base_XMLRPC {
    * @param int $blog_id
    * @param string $role
    */
-  protected function doAddUser ( $cas_id, $blog_id, $role )	{
+  protected function doAddUser ( $cas_id, $blog_id, $role ) {
     global $wpdb;
 
     if (!strlen($cas_id))
@@ -237,7 +235,7 @@ abstract class Midd_Base_XMLRPC {
    * @param string $cas_id
    * @param int $blog_id
    */
-  protected function doRemoveUser ( $cas_id, $blog_id )	{
+  protected function doRemoveUser ( $cas_id, $blog_id ) {
     global $wpdb;
 
     if (!strlen($cas_id))
@@ -274,7 +272,7 @@ abstract class Midd_Base_XMLRPC {
    * @param string $group_dn
    * @param string $role
    */
-  protected function doAddSyncedGroup ( $blog_id_or_name, $group_dn, $role)	{
+  protected function doAddSyncedGroup ( $blog_id_or_name, $group_dn, $role) {
     global $wpdb;
 
     if (empty($blog_id_or_name))
@@ -314,7 +312,7 @@ abstract class Midd_Base_XMLRPC {
    *
    * @param mixed $blog_id_or_name
    */
-  protected function doGetSyncedGroups ( $blog_id_or_name )	{
+  protected function doGetSyncedGroups ( $blog_id_or_name ) {
     global $wpdb;
 
     if (empty($blog_id_or_name))
@@ -340,7 +338,7 @@ abstract class Midd_Base_XMLRPC {
    * @param mixed $blog_id_or_name
    * @param string $group_dn
    */
-  function doRemoveSyncedGroup ( $blog_id_or_name, $group_dn )	{
+  function doRemoveSyncedGroup ( $blog_id_or_name, $group_dn ) {
     global $wpdb;
 
     if (empty($blog_id_or_name))
@@ -377,17 +375,17 @@ abstract class Midd_Base_XMLRPC {
     switch_to_blog($blog_id);
     $blog = get_blog_details();
     $info = array(
-      'blogid'		=> $blog_id,
-      'name'			=> $this->blognameFromId($blog_id),
-      'title'			=> get_option( 'blogname' ),
-      'isAdmin'		=> current_user_can('manage_options'),
-      'isSubscriber'	=> current_user_can('read'),
-      'canRead'		=> (current_user_can('read') || intval(get_option('blog_public')) >= -1),
-      'public'		=> intval(get_option('blog_public')),
-      'deleted'		=> intval($blog->deleted),
-      'archived'		=> intval($blog->archived),
-      'url'			=> get_option( 'home' ) . '/',
-      'xmlrpc'		=> site_url( 'xmlrpc.php' ),
+      'blogid'        => $blog_id,
+      'name'          => $this->blognameFromId($blog_id),
+      'title'         => get_option( 'blogname' ),
+      'isAdmin'       => current_user_can('manage_options'),
+      'isSubscriber'  => current_user_can('read'),
+      'canRead'       => (current_user_can('read') || intval(get_option('blog_public')) >= -1),
+      'public'        => intval(get_option('blog_public')),
+      'deleted'       => intval($blog->deleted),
+      'archived'      => intval($blog->archived),
+      'url'           => get_option( 'home' ) . '/',
+      'xmlrpc'        => site_url( 'xmlrpc.php' ),
     );
     if (current_user_can('list_users')) {
       $info['synced_groups'] = dynaddusers_get_synced_groups();

@@ -45,14 +45,14 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
 
     // Authenticate the service-user.
     if ( $this->auth_failed ) {
-			$service_user = new WP_Error( 'login_prevented' );
-		} else {
-			$service_user = wp_authenticate( $args[0], $args[1] );
-		}
-		if ( is_wp_error( $service_user ) ) {
-			throw new Midd_XMLRPC_Exception('Incorrect username or password.', 403);
-			// Flag that authentication has failed once on this wp_xmlrpc_server instance
-			$this->auth_failed = true;
+      $service_user = new WP_Error( 'login_prevented' );
+    } else {
+      $service_user = wp_authenticate( $args[0], $args[1] );
+    }
+    if ( is_wp_error( $service_user ) ) {
+      throw new Midd_XMLRPC_Exception('Incorrect username or password.', 403);
+      // Flag that authentication has failed once on this wp_xmlrpc_server instance
+      $this->auth_failed = true;
     }
 
     // If the service_username is the same as the act_as_username, take actions
@@ -86,12 +86,12 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
       }
     }
 
-	// register the user as authenticated.
-	wp_set_auth_cookie( $user->ID );
-	do_action('wp_login', $user->user_login, $user);
-	wp_set_current_user($user->ID, $user->user_login);
+    // register the user as authenticated.
+    wp_set_auth_cookie( $user->ID );
+    do_action('wp_login', $user->user_login, $user);
+    wp_set_current_user($user->ID, $user->user_login);
 
-	return $user;
+    return $user;
   }
 
   /**
@@ -120,7 +120,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   public function blogExists ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
 
@@ -142,7 +142,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   public function getUsersBlogs ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
 
@@ -165,7 +165,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   public function getBlog ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
     return $this->doGetBlog($args[3]);
@@ -187,10 +187,10 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   public function searchBlogs ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
-	return $this->doSearchBlogs($args[3]);
+    return $this->doSearchBlogs($args[3]);
   }
 
   /**
@@ -211,7 +211,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   function createBlog ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
     $name = $args[3];
@@ -239,7 +239,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
   public function addUser ($args) {
     try {
       $user = $this->authenticate($args);
-		} catch (Midd_XMLRPC_Exception $e) {
+    } catch (Midd_XMLRPC_Exception $e) {
       return new IXR_Error($e->getCode(), $e->getMessage());
     }
     return $this->doAddUser($args[3], $args[4], $args[5]);
