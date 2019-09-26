@@ -55,21 +55,35 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
 			$this->auth_failed = true;
     }
 
-
-    $user = get_userdatabylogin($args[2]);
-
-	// If the user account doesn't exist, create them.
-	if (!$user) {
-      try {
-        $info = dynaddusers_get_user_info($args[2]);
-		$user = dynaddusers_get_user($info);
-      } catch (Exception $e) {
-        throw new Midd_XMLRPC_Exception('Could not create act-as-user account: ' . $e->getMessage(), 400);
+    // If the service_username is the same as the act_as_username, take actions
+    // using the service_user account.
+    if ($args[0] == $args[2]) {
+      $user = $service_user;
+    }
+    // Allow the service user to take action as other users if authorized.
+    else {
+      // Verify that the service-user is authorized to take action on behalf of
+      // others.
+      // These network-manangement capabilities are possessed by super-admins.
+      if (!user_can($service_user, 'manage_sites') || !user_can($service_user, 'manage_network_users')) {
+        throw new Midd_XMLRPC_Exception('This account is not authorized to use this API method.', 403);
       }
-	}
 
-    if ( is_wp_error( $user ) ) {
-			throw new Midd_XMLRPC_Exception('Could not find or create the target user.', 500);
+      $user = get_userdatabylogin($args[2]);
+
+      // If the user account doesn't exist, create them.
+      if (!$user) {
+        try {
+          $info = dynaddusers_get_user_info($args[2]);
+          $user = dynaddusers_get_user($info);
+        } catch (Exception $e) {
+          throw new Midd_XMLRPC_Exception('Could not create act-as-user account: ' . $e->getMessage(), 400);
+        }
+      }
+
+      if ( is_wp_error( $user ) ) {
+        throw new Midd_XMLRPC_Exception('Could not find or create the target user.', 500);
+      }
     }
 
 	// register the user as authenticated.
