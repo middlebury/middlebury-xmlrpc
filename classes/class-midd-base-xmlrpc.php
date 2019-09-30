@@ -202,11 +202,11 @@ abstract class Midd_Base_XMLRPC {
   /**
    * Add a user to a blog.
    *
-   * @param string $cas_id
    * @param mixed $blog_id_or_name
+   * @param string $cas_id
    * @param string $role
    */
-  protected function doAddUser ( $cas_id, $blog_id_or_name, $role ) {
+  protected function doAddUser ( $blog_id_or_name, $cas_id, $role ) {
     global $wpdb;
 
     if (!strlen($cas_id))
@@ -246,10 +246,10 @@ abstract class Midd_Base_XMLRPC {
   /**
    * Remove a user from a blog.
    *
-   * @param string $cas_id
    * @param mixed $blog_id_or_name
+   * @param string $cas_id
    */
-  protected function doRemoveUser ( $cas_id, $blog_id_or_name ) {
+  protected function doRemoveUser ( $blog_id_or_name, $cas_id ) {
     global $wpdb;
 
     if (!strlen($cas_id))
