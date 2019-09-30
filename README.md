@@ -216,7 +216,7 @@ populate enrollment changes.
   - string `service_password`
   - string `act_as_username`
   - string `cas_id`
-  - int `blog_id`
+  - int `blog_id` OR string `blog_name`
   - string `role`
 
 - `midd2.removeUser`
@@ -226,7 +226,7 @@ populate enrollment changes.
   - string `service_password`
   - string `act_as_username`
   - string `cas_id`
-  - int `blog_id`
+  - int `blog_id` OR string `blog_name`
 
 - `midd2.addSyncedGroup`
 

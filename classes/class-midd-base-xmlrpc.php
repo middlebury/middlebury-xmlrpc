@@ -203,16 +203,16 @@ abstract class Midd_Base_XMLRPC {
    * Add a user to a blog.
    *
    * @param string $cas_id
-   * @param int $blog_id
+   * @param mixed $blog_id_or_name
    * @param string $role
    */
-  protected function doAddUser ( $cas_id, $blog_id, $role ) {
+  protected function doAddUser ( $cas_id, $blog_id_or_name, $role ) {
     global $wpdb;
 
     if (!strlen($cas_id))
       return(new IXR_Error(400, __("This method requires a CAS ID string.")));
-    if (!is_int($blog_id))
-      return(new IXR_Error(400, __("This method requires a blog ID integer.")));
+    if (empty($blog_id_or_name))
+      return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
     if (!strlen($role))
       return(new IXR_Error(400, __("This method requires a WordPress role string.")));
 
@@ -223,6 +223,10 @@ abstract class Midd_Base_XMLRPC {
       return new IXR_Error(400, 'Could not create user account: ' . $e->getMessage());
     }
 
+    if (is_numeric($blog_id_or_name))
+      $blog_id = intval($blog_id_or_name);
+    else
+      $blog_id = get_id_from_blogname($blog_id_or_name);
     switch_to_blog($blog_id);
 
     // Check permissions for the current user.
@@ -243,15 +247,15 @@ abstract class Midd_Base_XMLRPC {
    * Remove a user from a blog.
    *
    * @param string $cas_id
-   * @param int $blog_id
+   * @param mixed $blog_id_or_name
    */
-  protected function doRemoveUser ( $cas_id, $blog_id ) {
+  protected function doRemoveUser ( $cas_id, $blog_id_or_name ) {
     global $wpdb;
 
     if (!strlen($cas_id))
       return(new IXR_Error(400, __("This method requires a CAS ID string.")));
-    if (!is_int($blog_id))
-      return(new IXR_Error(400, __("This method requires a blog ID integer.")));
+    if (empty($blog_id_or_name))
+      return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
 
     try {
       $info = dynaddusers_get_user_info($cas_id);
@@ -260,6 +264,10 @@ abstract class Midd_Base_XMLRPC {
       return new IXR_Error(400, 'Invalid user account: ' . $e->getMessage());
     }
 
+    if (is_numeric($blog_id_or_name))
+      $blog_id = intval($blog_id_or_name);
+    else
+      $blog_id = get_id_from_blogname($blog_id_or_name);
     switch_to_blog($blog_id);
 
     // Check permissions for the current user.

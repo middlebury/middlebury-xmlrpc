@@ -119,7 +119,7 @@ class Midd_XMLRPC extends Midd_Base_XMLRPC {
    * @param array $args
    *   [
    *     0 => cas_id,
-   *     1 => blog_id,
+   *     1 => blog_id_or_name,
    *     2 => role,
    *   ]
    *
@@ -136,7 +136,7 @@ class Midd_XMLRPC extends Midd_Base_XMLRPC {
    * @param array $args
    *   [
    *     0 => cas_id,
-   *     1 => blog_id,
+   *     1 => blog_id_or_name,
    *   ]
    *
    * @return array

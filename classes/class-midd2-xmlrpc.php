@@ -244,7 +244,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
    *     1 => service_password,
    *     2 => act_as_username,
    *     3 => cas_id,
-   *     4 => blog_id,
+   *     4 => blog_id_or_name,
    *     5 => role,
    *   ]
    *
@@ -268,7 +268,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
    *     1 => service_password,
    *     2 => act_as_username,
    *     3 => cas_id,
-   *     4 => blog_id,
+   *     4 => blog_id_or_name,
    *   ]
    *
    * @return array
