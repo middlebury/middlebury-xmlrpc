@@ -45,6 +45,7 @@ abstract class Midd_Base_XMLRPC {
         $prefix . '.createBlog' => [$instance, 'createBlog'],
         $prefix . '.addUser' => [$instance, 'addUser'],
         $prefix . '.removeUser' => [$instance, 'removeUser'],
+        $prefix . '.getUserRoles' => [$instance, 'getUserRoles'],
         $prefix . '.addSyncedGroup' => [$instance, 'addSyncedGroup'],
         $prefix . '.getSyncedGroups' => [$instance, 'getSyncedGroups'],
         $prefix . '.removeSyncedGroup' => [$instance, 'removeSyncedGroup'],
@@ -282,6 +283,43 @@ abstract class Midd_Base_XMLRPC {
     restore_current_blog( );
   }
 
+  /**
+   * Answer the user's roles in the blog.
+   *
+   * @param mixed $blog_id_or_name
+   * @param string $cas_id
+   */
+  protected function doGetUserRoles ( $blog_id_or_name, $cas_id ) {
+    global $wpdb;
+
+    if (!strlen($cas_id))
+      return(new IXR_Error(400, __("This method requires a CAS ID string.")));
+    if (empty($blog_id_or_name))
+      return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
+
+    try {
+      $info = dynaddusers_get_user_info($cas_id);
+      $user = dynaddusers_get_user($info);
+    } catch (Exception $e) {
+      return new IXR_Error(400, 'Invalid user account: ' . $e->getMessage());
+    }
+
+    if (is_numeric($blog_id_or_name))
+      $blog_id = intval($blog_id_or_name);
+    else
+      $blog_id = get_id_from_blogname($blog_id_or_name);
+    switch_to_blog($blog_id);
+
+    // Check permissions for the current user.
+    if (!current_user_can('list_users')) {
+      return(new IXR_Error(403, __("You are not an authorized to list_users for this site.")));
+    }
+
+    // Get the roles.
+    $info = get_userdata($user->ID);
+    restore_current_blog( );
+    return $info->roles;
+  }
 
   /**
    * Add a group of users to a blog.

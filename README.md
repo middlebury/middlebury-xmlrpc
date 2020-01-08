@@ -104,6 +104,15 @@ current user.
   - string `cas_id`
   - int `blog_id`
 
+- `midd.getUserRoles`
+
+  Parameters:
+  - string `cas_id`
+  - int `blog_id`
+
+  Return:
+  - array - An array of role-strings.
+
 - `midd.addSyncedGroup`
 
   Parameters:
@@ -227,6 +236,18 @@ populate enrollment changes.
   - string `act_as_username`
   - string `cas_id`
   - int `blog_id` OR string `blog_name`
+
+- `midd2.getUserRoles`
+
+  Parameters:
+  - string `service_user`
+  - string `service_password`
+  - string `act_as_username`
+  - string `cas_id`
+  - int `blog_id` OR string `blog_name`
+
+  Return:
+  - array - An array of role-strings.
 
 - `midd2.addSyncedGroup`
 

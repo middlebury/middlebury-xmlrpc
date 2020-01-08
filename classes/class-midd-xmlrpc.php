@@ -147,6 +147,22 @@ class Midd_XMLRPC extends Midd_Base_XMLRPC {
   }
 
   /**
+   * Answer the user's roles in the blog.
+   *
+   * @param array $args
+   *   [
+   *     0 => blog_id_or_name,
+   *     1 => cas_id,
+   *   ]
+   *
+   * @return array
+   */
+  public function getUserRoles ($args) {
+    $this->authenticate();
+    return $this->doGetUserRoles($args[0], $args[1]);
+  }
+
+  /**
    * Add a synced group to a blog.
    *
    * @param array $args
