@@ -218,8 +218,8 @@ abstract class Midd_Base_XMLRPC {
       return(new IXR_Error(400, __("This method requires a WordPress role string.")));
 
     try {
-      $info = dynaddusers_get_directory()->getUserInfo($cas_id);
-      $user = dynaddusers_get_user_manager()->getOrCreateUser($info);
+      $info = dynaddusers_plugin()->getDirectory()->getUserInfo($cas_id);
+      $user = dynaddusers_plugin()->getUserManager()->getOrCreateUser($info);
     } catch (Exception $e) {
       return new IXR_Error(400, 'Could not create user account: ' . $e->getMessage());
     }
@@ -236,7 +236,7 @@ abstract class Midd_Base_XMLRPC {
     }
 
     try {
-      dynaddusers_get_user_manager()->addUserToBlog($user, $role);
+      dynaddusers_plugin()->getUserManager()->addUserToBlog($user, $role);
     } catch (Exception $e) {
       // Exception thrown if the blog does not exist or if the user is already a member.
       return new IXR_Error(200, $e->getMessage());
@@ -259,8 +259,8 @@ abstract class Midd_Base_XMLRPC {
       return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
 
     try {
-      $info = dynaddusers_get_directory()->getUserInfo($cas_id);
-      $user = dynaddusers_get_user_manager()->getOrCreateUser($info);
+      $info = dynaddusers_plugin()->getDirectory()->getUserInfo($cas_id);
+      $user = dynaddusers_plugin()->getUserManager()->getOrCreateUser($info);
     } catch (Exception $e) {
       return new IXR_Error(400, 'Invalid user account: ' . $e->getMessage());
     }
@@ -298,8 +298,8 @@ abstract class Midd_Base_XMLRPC {
       return(new IXR_Error(400, __("This method requires a blog ID integer or blog name string.")));
 
     try {
-      $info = dynaddusers_get_directory()->getUserInfo($cas_id);
-      $user = dynaddusers_get_user_manager()->getOrCreateUser($info);
+      $info = dynaddusers_plugin()->getDirectory()->getUserInfo($cas_id);
+      $user = dynaddusers_plugin()->getUserManager()->getOrCreateUser($info);
     } catch (Exception $e) {
       return new IXR_Error(400, 'Invalid user account: ' . $e->getMessage());
     }
@@ -350,15 +350,15 @@ abstract class Midd_Base_XMLRPC {
     }
 
     try {
-      $memberInfo = dynaddusers_get_directory()->getGroupMemberInfo($group_dn);
+      $memberInfo = dynaddusers_plugin()->getDirectory()->getGroupMemberInfo($group_dn);
       if (!is_array($memberInfo))
         return(new IXR_Error(400, __("Could not find group members for ".$group_dn)));
     } catch (Exception $e) {
       return(new IXR_Error(400, __("Could not find group members for ".$group_dn)));
     }
 
-    dynaddusers_get_group_syncer()->keepGroupInSync($group_dn, $role);
-    dynaddusers_get_group_syncer()->syncGroup($blog_id, $group_dn, $role);
+    dynaddusers_plugin()->getGroupSyncer()->keepGroupInSync($group_dn, $role);
+    dynaddusers_plugin()->getGroupSyncer()->syncGroup($blog_id, $group_dn, $role);
     restore_current_blog();
     return true;
   }
@@ -385,7 +385,7 @@ abstract class Midd_Base_XMLRPC {
       return(new IXR_Error(403, __("You are not an authorized to list_users for this site.")));
     }
 
-    return dynaddusers_get_group_syncer()->getSyncedGroups();
+    return dynaddusers_plugin()->getGroupSyncer()->getSyncedGroups();
   }
 
   /**
@@ -414,8 +414,8 @@ abstract class Midd_Base_XMLRPC {
     }
 
     ob_start();
-    dynaddusers_get_group_syncer()->removeUsersInGroup($group_dn);
-    dynaddusers_get_group_syncer()->stopSyncingGroup($group_dn);
+    dynaddusers_plugin()->getGroupSyncer()->removeUsersInGroup($group_dn);
+    dynaddusers_plugin()->getGroupSyncer()->stopSyncingGroup($group_dn);
     ob_end_clean();
     return true;
   }
@@ -444,7 +444,7 @@ abstract class Midd_Base_XMLRPC {
       'xmlrpc'        => site_url( 'xmlrpc.php' ),
     );
     if (current_user_can('list_users')) {
-      $info['synced_groups'] = dynaddusers_get_group_syncer()->getSyncedGroups();
+      $info['synced_groups'] = dynaddusers_plugin()->getGroupSyncer()->getSyncedGroups();
     }
     restore_current_blog( );
     return $info;
