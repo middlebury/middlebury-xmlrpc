@@ -80,8 +80,8 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
       // If the user account doesn't exist, create them.
       if (!$user) {
         try {
-          $info = dynaddusers_plugin()->getDirectory()->getUserInfo($args[2]);
-          $user = dynaddusers_plugin()->getUserManager()->getOrCreateUser($info);
+          $info = dynamic_add_users()->getDirectory()->getUserInfo($args[2]);
+          $user = dynamic_add_users()->getUserManager()->getOrCreateUser($info);
         } catch (Exception $e) {
           throw new Midd_XMLRPC_Exception('Could not create act-as-user account: ' . $e->getMessage(), 400);
         }
