@@ -21,7 +21,9 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
   function call($methodname, $args)
   {
     // Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
-    trigger_error('XMLRPC call ' . $methodname . '(' . json_encode($args) . ')', E_USER_NOTICE);
+    if (get_site_option('middlebury_xmlrpc__log_calls')) {
+      trigger_error('XMLRPC call ' . $methodname . '(' . json_encode($args) . ')', E_USER_NOTICE);
+    }
 
     return parent::call($methodname, $args);
   }
@@ -32,7 +34,9 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
     // multicall doesn't call error(), so log our faults here.
     foreach ($results as $result) {
       if (!empty($result['faultCode'])) {
-        trigger_error('XMLRPC fault ['.$result['faultCode'].'] '. $result['faultString'], E_USER_WARNING);
+        if (get_site_option('middlebury_xmlrpc__log_errors')) {
+          trigger_error('XMLRPC fault ['.$result['faultCode'].'] '. $result['faultString'], E_USER_WARNING);
+        }
       }
     }
     return $results;
@@ -45,7 +49,9 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
         $error = new IXR_Error($error, $message);
     }
     // Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
-    trigger_error('XMLRPC fault ['.$error->code.'] '. $error->message, E_USER_WARNING);
+    if (get_site_option('middlebury_xmlrpc__log_errors')) {
+      trigger_error('XMLRPC fault ['.$error->code.'] '. $error->message, E_USER_WARNING);
+    }
 
     $this->output($error->getXml());
   }
@@ -54,3 +60,7 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
 // Add our custom XMLRPC methods.
 include_once(dirname(__FILE__) . '/classes/class-midd2-xmlrpc.php');
 add_filter( 'xmlrpc_methods', ['Midd2_XMLRPC', 'methods'] );
+
+// Register our network-admin settings.
+include_once(dirname(__FILE__) . '/classes/class-midd-xmlrpc-admin.php');
+Midd_Xmlrpc_Admin::init();
