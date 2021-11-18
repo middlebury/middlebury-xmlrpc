@@ -75,7 +75,7 @@ class Midd2_XMLRPC extends Midd_Base_XMLRPC {
         throw new Midd_XMLRPC_Exception('This account is not authorized to use this API method.', 403);
       }
 
-      $user = get_userdatabylogin($args[2]);
+      $user = get_user_by('login', $args[2]);
 
       // If the user account doesn't exist, create them.
       if (!$user) {
