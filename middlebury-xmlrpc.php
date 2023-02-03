@@ -3,7 +3,7 @@
 Plugin Name:    Midd XML-RPC Methods and server.
 Plugin URI:
 Description:    XML-RPC methods for searching for, creating, and checking permissions on blogs. Makes use of CAS authentication.
-Version:        1.0.0
+Version:        1.0.1
 Author:         Adam Franco
 Author URI:     http://www.adamfranco.com/
  */
@@ -50,7 +50,7 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
     }
     // Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
     if (get_site_option('middlebury_xmlrpc__log_errors')) {
-      trigger_error('XMLRPC fault ['.$error->code.'] '. $error->message, E_USER_WARNING);
+      trigger_error('Client ['.$_SERVER['REMOTE_ADDR'].'] has XMLRPC fault ['.$error->code.'] '. $error->message, E_USER_WARNING);
     }
 
     $this->output($error->getXml());
