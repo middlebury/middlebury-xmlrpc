@@ -22,7 +22,7 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
   {
     // Additions by Adam Franco 12/1/2017 to identify XMLRPC abuse.
     if (get_site_option('middlebury_xmlrpc__log_calls')) {
-      trigger_error('XMLRPC call ' . $methodname . '(' . json_encode($args) . ')', E_USER_NOTICE);
+      trigger_error('Client ['.$_SERVER['REMOTE_ADDR'].'] made XMLRPC call ' . $methodname . '(' . json_encode($args) . ')', E_USER_NOTICE);
     }
 
     return parent::call($methodname, $args);
@@ -35,7 +35,7 @@ class middlebury_xmlrpc_server extends wp_xmlrpc_server {
     foreach ($results as $result) {
       if (!empty($result['faultCode'])) {
         if (get_site_option('middlebury_xmlrpc__log_errors')) {
-          trigger_error('XMLRPC fault ['.$result['faultCode'].'] '. $result['faultString'], E_USER_WARNING);
+          trigger_error('Client ['.$_SERVER['REMOTE_ADDR'].'] has XMLRPC fault ['.$result['faultCode'].'] '. $result['faultString'], E_USER_WARNING);
         }
       }
     }
